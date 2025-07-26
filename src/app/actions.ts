@@ -2,6 +2,7 @@
 
 import { analyzeRoute } from "@/ai/flows/route-analysis";
 import { getPredictiveAlerts } from "@/ai/flows/predictive-alerts";
+import { describeImage } from "@/ai/flows/describe-image";
 import type { TravelAdvice } from "@/types";
 import { getRedditTrafficReports } from "@/services/reddit";
 import { getNewsTrafficReports } from "@/services/news";
@@ -61,12 +62,22 @@ export async function getTravelAdvice(data: {
       routeAnalysis, 
       predictiveAlerts,
       liveTrafficReports,
-      weather: weatherData || { temp: 0, description: 'N/A' }, // Provide default weather if fetch fails
+      weather: weatherData || { temp: 0, description: 'N/A', icon: '', wind_speed: 0 }, // Provide default weather if fetch fails
     };
 
   } catch (error) {
     console.error("Error getting travel advice:", error);
     // Provide a user-friendly error message
     throw new Error("Failed to get travel advice from our AI. Please try again.");
+  }
+}
+
+export async function generateDescriptionForImage(photoDataUri: string) {
+  try {
+    const result = await describeImage({ photoDataUri });
+    return result.description;
+  } catch (error) {
+    console.error("Error generating image description:", error);
+    return "Could not generate a description. Please enter one manually.";
   }
 }

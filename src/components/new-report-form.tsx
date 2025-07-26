@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -8,6 +8,7 @@ import { collection, addDoc, serverTimestamp, GeoPoint } from 'firebase/firestor
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
+import { generateDescriptionForImage } from '@/app/actions';
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,6 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from './ui/label';
 import { Input } from './ui/input';
 import Image from 'next/image';
+import { LoaderCircle } from 'lucide-react';
 
 const reportSchema = z.object({
   description: z.string().min(10, { message: 'Description must be at least 10 characters.' }),
@@ -27,6 +29,7 @@ type ReportFormValues = z.infer<typeof reportSchema>;
 export function NewReportForm() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isAiLoading, startAiTransition] = useTransition();
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
@@ -34,6 +37,9 @@ export function NewReportForm() {
 
   const form = useForm<ReportFormValues>({
     resolver: zodResolver(reportSchema),
+    defaultValues: {
+      description: '',
+    },
   });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,7 +48,14 @@ export function NewReportForm() {
       setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result as string);
+        const dataUri = reader.result as string;
+        setImagePreview(dataUri);
+        
+        startAiTransition(async () => {
+          form.setValue('description', 'Generating description...');
+          const description = await generateDescriptionForImage(dataUri);
+          form.setValue('description', description);
+        });
       };
       reader.readAsDataURL(file);
     }
@@ -119,7 +132,7 @@ export function NewReportForm() {
     <Card>
       <CardHeader>
         <CardTitle>Submit a New Report</CardTitle>
-        <CardDescription>Fill in the details of the civic issue.</CardDescription>
+        <CardDescription>Fill in the details of the civic issue. You can upload a photo and our AI will help write a description.</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -141,10 +154,18 @@ export function NewReportForm() {
 
           <div className="space-y-2">
             <Label>Description</Label>
-            <Textarea
-              placeholder="Describe the issue in detail..."
-              {...form.register('description')}
-            />
+            <div className="relative">
+              <Textarea
+                placeholder="Describe the issue in detail..."
+                {...form.register('description')}
+                disabled={isAiLoading}
+              />
+              {isAiLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-background/50">
+                  <LoaderCircle className="animate-spin text-primary" />
+                </div>
+              )}
+            </div>
             {form.formState.errors.description && <p className="text-xs text-destructive">{form.formState.errors.description.message}</p>}
           </div>
 
@@ -179,7 +200,7 @@ export function NewReportForm() {
             </div>
           </div>
           
-          <Button type="submit" disabled={isLoading} className="w-full">
+          <Button type="submit" disabled={isLoading || isAiLoading} className="w-full">
             {isLoading ? 'Submitting...' : 'Submit Report'}
           </Button>
         </form>
