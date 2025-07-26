@@ -26,6 +26,8 @@ const reportSchema = z.object({
 
 type ReportFormValues = z.infer<typeof reportSchema>;
 
+const DEPARTMENTS = ["BBMP", "BESCOM", "BWSSB", "BTP", "Other"];
+
 export function NewReportForm() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -53,8 +55,15 @@ export function NewReportForm() {
         
         startAiTransition(async () => {
           form.setValue('description', 'Generating description...');
-          const description = await generateDescriptionForImage(dataUri);
-          form.setValue('description', description);
+          form.setValue('department', '');
+          const result = await generateDescriptionForImage(dataUri);
+          form.setValue('description', result.description);
+          
+          if (DEPARTMENTS.includes(result.department)) {
+            form.setValue('department', result.department);
+          } else {
+             form.setValue('department', 'Other');
+          }
         });
       };
       reader.readAsDataURL(file);
@@ -132,7 +141,7 @@ export function NewReportForm() {
     <Card>
       <CardHeader>
         <CardTitle>Submit a New Report</CardTitle>
-        <CardDescription>Fill in the details of the civic issue. You can upload a photo and our AI will help write a description.</CardDescription>
+        <CardDescription>Fill in the details of the civic issue. You can upload a photo and our AI will help write a description and assign a department.</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -171,7 +180,11 @@ export function NewReportForm() {
 
           <div className="space-y-2">
             <Label>Department</Label>
-             <Select onValueChange={(value) => form.setValue('department', value)}>
+             <Select 
+                value={form.watch('department')} 
+                onValueChange={(value) => form.setValue('department', value)}
+                disabled={isAiLoading}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a department" />
                 </SelectTrigger>

@@ -2,7 +2,7 @@
 
 import { analyzeRoute } from "@/ai/flows/route-analysis";
 import { getPredictiveAlerts } from "@/ai/flows/predictive-alerts";
-import { describeImage } from "@/ai/flows/describe-image";
+import { describeImage, DescribeImageOutput } from "@/ai/flows/describe-image";
 import type { TravelAdvice } from "@/types";
 import { getRedditTrafficReports } from "@/services/reddit";
 import { getNewsTrafficReports } from "@/services/news";
@@ -72,12 +72,16 @@ export async function getTravelAdvice(data: {
   }
 }
 
-export async function generateDescriptionForImage(photoDataUri: string) {
+export async function generateDescriptionForImage(photoDataUri: string): Promise<DescribeImageOutput> {
   try {
     const result = await describeImage({ photoDataUri });
-    return result.description;
+    return result;
   } catch (error) {
     console.error("Error generating image description:", error);
-    return "Could not generate a description. Please enter one manually.";
+    return {
+        description: "Could not generate a description. Please enter one manually.",
+        department: "Other",
+        locationDescription: ""
+    };
   }
 }
