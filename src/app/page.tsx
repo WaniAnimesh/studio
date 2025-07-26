@@ -16,8 +16,6 @@ import { useToast } from "@/hooks/use-toast";
 import { getTravelAdvice } from "./actions";
 import type { TravelAdvice, Alert } from "@/types";
 import { MapView } from "@/components/map-view";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
 
 import {
   Clock,
@@ -43,51 +41,61 @@ const formSchema = z.object({
 });
 
 const AnalysisResult = ({ analysis }: { analysis: TravelAdvice["routeAnalysis"] }) => (
-  <Card>
+  <Card className="h-full">
     <CardHeader>
       <CardTitle className="flex items-center gap-2"><Route className="text-primary" /> AI Route Analysis</CardTitle>
       <CardDescription>{analysis.prediction}</CardDescription>
     </CardHeader>
-    <CardContent className="space-y-6">
+    <CardContent className="space-y-4">
       <div className="space-y-2">
         <h3 className="font-semibold flex items-center gap-2 text-muted-foreground"><TrafficCone size={18}/> Current Traffic</h3>
-        <p className="pl-7">{analysis.trafficAnalysis}</p>
+        <p>{analysis.trafficAnalysis}</p>
       </div>
       <div className="space-y-2">
         <h3 className="font-semibold flex items-center gap-2 text-muted-foreground"><CloudRain size={18}/> Weather Impact</h3>
-        <p className="pl-7">{analysis.weatherImpact}</p>
-      </div>
-       <Separator/>
-      <div className="space-y-3 p-4 bg-primary/10 rounded-lg">
-        <h3 className="font-semibold flex items-center gap-2"><Lightbulb size={18} className="text-primary"/> AI Recommendation</h3>
-        <ul className="space-y-2 pl-7 text-sm">
-          <li className="flex items-start gap-2">
-            <span className="font-bold text-primary shrink-0">Primary:</span>
-            <span>{analysis.aiRecommendation.primary}</span>
-          </li>
-           <li className="flex items-start gap-2">
-            <span className="font-bold text-accent shrink-0">Alternative:</span>
-             <span>{analysis.aiRecommendation.alternative}</span>
-          </li>
-           <li className="flex items-start gap-2">
-            <span className="font-bold text-destructive shrink-0">Avoid:</span>
-             <span>{analysis.aiRecommendation.avoid}</span>
-          </li>
-        </ul>
-      </div>
-      <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
-        <CalendarClock size={16} />
-        <span className="font-semibold">Best Departure:</span>
-        <span>{analysis.bestDepartureTime}</span>
+        <p>{analysis.weatherImpact}</p>
       </div>
     </CardContent>
   </Card>
 );
 
+const RecommendationResult = ({ analysis }: { analysis: TravelAdvice["routeAnalysis"] }) => (
+    <Card className="h-full">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2"><Lightbulb className="text-primary" /> AI Recommendation</CardTitle>
+        <CardDescription>Optimal travel advice based on current data.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <ul className="space-y-3 text-sm">
+            <li className="flex items-start gap-3">
+                <span className="font-bold text-primary shrink-0 pt-0.5">Primary:</span>
+                <span>{analysis.aiRecommendation.primary}</span>
+            </li>
+            <li className="flex items-start gap-3">
+                <span className="font-bold text-accent shrink-0 pt-0.5">Alternative:</span>
+                <span>{analysis.aiRecommendation.alternative}</span>
+            </li>
+            <li className="flex items-start gap-3">
+                <span className="font-bold text-destructive shrink-0 pt-0.5">Avoid:</span>
+                <span>{analysis.aiRecommendation.avoid}</span>
+            </li>
+        </ul>
+        <Separator />
+         <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <CalendarClock size={16} />
+            <span className="font-semibold">Best Departure:</span>
+            <span>{analysis.bestDepartureTime}</span>
+        </div>
+      </CardContent>
+    </Card>
+);
+
+
 const WeatherCard = () => (
-  <Card>
+  <Card className="h-full">
     <CardHeader>
-      <CardTitle className="flex items-center gap-2"><CloudSun className="text-primary"/> Weather Conditions</CardTitle>
+      <CardTitle className="flex items-center gap-2"><CloudSun className="text-primary"/> Weather Report</CardTitle>
+      <CardDescription>Current weather conditions in Bengaluru.</CardDescription>
     </CardHeader>
     <CardContent className="flex items-center gap-4">
       <CloudSun size={48} className="text-yellow-500" />
@@ -106,14 +114,15 @@ const LiveReports = () => {
     "Procession on MG Road causing delays.",
   ];
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2"><Car className="text-primary"/> Live Traffic Reports</CardTitle>
+        <CardDescription>Real-time updates from various sources.</CardDescription>
       </CardHeader>
       <CardContent>
         <ul className="space-y-3">
           {reports.map((report, index) => (
-            <li key={index} className="flex items-start gap-3">
+            <li key={index} className="flex items-start gap-3 text-sm">
               <Info size={16} className="mt-1 text-muted-foreground shrink-0"/>
               <span>{report}</span>
             </li>
@@ -124,77 +133,32 @@ const LiveReports = () => {
   );
 };
 
-const getAlertIcon = (type: string) => {
-  switch (type.toLowerCase()) {
-    case 'accident': return <TriangleAlert className="text-destructive" />;
-    case 'road closure': return <TrafficCone className="text-orange-500" />;
-    case 'congestion': return <Car className="text-yellow-500" />;
-    default: return <ShieldAlert className="text-primary" />;
-  }
-};
-
-const AlertsDisplay = ({ alerts }: { alerts: Alert[] }) => (
-  <div className="h-full bg-card p-4 md:p-6 overflow-y-auto">
-    <h2 className="text-xl font-bold mb-4">Predictive Alerts</h2>
-    <div className="space-y-4">
-      {alerts.sort((a,b) => b.relevance - a.relevance).map((alert, index) => (
-        <Card key={index} className="bg-background">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-4">
-              <div className="pt-1">{getAlertIcon(alert.type)}</div>
-              <div className="flex-1">
-                <div className="flex justify-between items-start">
-                  <h3 className="font-bold capitalize">{alert.type}</h3>
-                  <Badge variant={alert.relevance > 0.7 ? "destructive" : alert.relevance > 0.4 ? "secondary" : "default"} className="capitalize">{alert.relevance > 0.7 ? "High" : alert.relevance > 0.4 ? "Medium" : "Low"} Rel.</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">{alert.location}</p>
-                <p className="text-sm mt-2">{alert.description}</p>
-                <div className="mt-3 text-xs text-muted-foreground">
-                    <p><span className="font-semibold">Action:</span> {alert.recommendedAction}</p>
-                </div>
-                <div className="mt-3 space-y-1">
-                   <div className="flex justify-between items-center text-xs text-muted-foreground">
-                    <span>Confidence</span>
-                    <span>{(alert.confidence * 100).toFixed(0)}%</span>
-                   </div>
-                   <Progress value={alert.confidence * 100} className="h-2" />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  </div>
-);
-
 const LoadingSkeletons = () => (
-  <div className="space-y-6">
+  <>
     <Card>
       <CardHeader>
         <Skeleton className="h-6 w-1/2" />
         <Skeleton className="h-4 w-3/4" />
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-            <Skeleton className="h-5 w-1/3" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-5/6" />
-        </div>
-        <div className="space-y-2">
-            <Skeleton className="h-5 w-1/3" />
-            <Skeleton className="h-4 w-full" />
-        </div>
-         <div className="space-y-2 pt-4">
-            <Skeleton className="h-5 w-1/4" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-1/2" />
-        </div>
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
       </CardContent>
     </Card>
-  </div>
+    <Card>
+      <CardHeader>
+        <Skeleton className="h-6 w-1/2" />
+        <Skeleton className="h-4 w-3/4" />
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+      </CardContent>
+    </Card>
+  </>
 );
+
 
 export default function Home() {
   const [isPending, startTransition] = useTransition();
@@ -227,81 +191,93 @@ export default function Home() {
 
   return (
     <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""}>
-      <div className="flex flex-col md:flex-row h-screen bg-background text-foreground overflow-hidden">
-        <aside className="w-full md:w-1/3 xl:w-1/4 h-full flex flex-col p-4 md:p-6 space-y-6 overflow-y-auto border-r">
-          <header>
-            <h1 className="text-2xl font-bold text-primary">Bengaluru Travel Advisory</h1>
-            <p className="text-sm text-muted-foreground">Your AI guide to navigating the city.</p>
-          </header>
-          
-          <Separator />
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Plan Your Route</CardTitle>
-              <CardDescription>Enter your origin and destination to get started.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="origin"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2"><MapPin size={16}/> Origin</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., Koramangala" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="destination"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2"><Flag size={16}/> Destination</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., Indiranagar" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="w-full" disabled={isPending}>
-                    {isPending ? <LoaderCircle className="animate-spin" /> : "Get AI Route Advice"}
-                  </Button>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-
-          {isPending && <LoadingSkeletons />}
-          {advice?.routeAnalysis && <AnalysisResult analysis={advice.routeAnalysis} />}
-          
-          <WeatherCard />
-          <LiveReports />
-
-        </aside>
-        
-        <main className="w-full md:w-2/3 xl:w-3/4 flex flex-col h-full">
-          <div className="flex-grow h-[60%] md:h-full relative">
-            <MapView />
-          </div>
-          <div className="h-[40%] md:h-1/2 xl:h-1/3 border-t">
-            {isPending && <div className="flex items-center justify-center h-full"><LoaderCircle className="animate-spin text-primary" size={32}/></div>}
-            {advice?.predictiveAlerts ? <AlertsDisplay alerts={advice.predictiveAlerts.alerts} /> : 
-             !isPending && (
-                <div className="flex flex-col items-center justify-center h-full text-center p-8">
-                    <MapIcon size={48} className="text-muted-foreground mb-4"/>
-                    <h3 className="text-lg font-semibold">Ready for Adventure?</h3>
-                    <p className="text-muted-foreground">Enter your route to see live map data and AI-powered travel advice.</p>
+      <div className="min-h-screen bg-background text-foreground">
+        <header className="bg-card border-b">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
+                <div className="text-center sm:text-left">
+                     <h1 className="text-2xl font-bold text-primary">Bengaluru Travel Advisory</h1>
+                    <p className="text-sm text-muted-foreground">Your AI guide to navigating the city.</p>
                 </div>
-             )
-            }
+                <Card className="w-full sm:w-auto">
+                    <CardContent className="p-4">
+                         <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col sm:flex-row items-center gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="origin"
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="sr-only">Origin</FormLabel>
+                                        <FormControl>
+                                        <Input placeholder="Origin" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="destination"
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="sr-only">Destination</FormLabel>
+                                        <FormControl>
+                                        <Input placeholder="Destination" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+                                <Button type="submit" className="w-full sm:w-auto" disabled={isPending}>
+                                    {isPending ? <LoaderCircle className="animate-spin" /> : "Get AI Route Advice"}
+                                </Button>
+                            </form>
+                        </Form>
+                    </CardContent>
+                </Card>
+            </div>
           </div>
+        </header>
+        
+        <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {isPending && <LoadingSkeletons />}
+                {advice?.routeAnalysis && (
+                    <>
+                        <AnalysisResult analysis={advice.routeAnalysis} />
+                        <RecommendationResult analysis={advice.routeAnalysis} />
+                    </>
+                )}
+                 {!isPending && !advice && (
+                    <>
+                        <Card className="flex flex-col items-center justify-center text-center p-8 h-full">
+                            <Route size={48} className="text-muted-foreground mb-4"/>
+                            <h3 className="text-lg font-semibold">Ready for Adventure?</h3>
+                            <p className="text-muted-foreground">Enter your route to see AI-powered travel advice.</p>
+                        </Card>
+                         <Card className="flex flex-col items-center justify-center text-center p-8 h-full">
+                            <Lightbulb size={48} className="text-muted-foreground mb-4"/>
+                            <h3 className="text-lg font-semibold">Get Smart Recommendations</h3>
+                            <p className="text-muted-foreground">Our AI provides the best routes, times, and tips.</p>
+                        </Card>
+                    </>
+                )}
+                <LiveReports />
+                <WeatherCard />
+            </div>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><MapIcon className="text-primary"/> Interactive Map</CardTitle>
+                    <CardDescription>Visualize traffic conditions and incidents in Bengaluru.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="h-[400px] md:h-[500px] rounded-lg overflow-hidden">
+                        <MapView />
+                    </div>
+                </CardContent>
+            </Card>
         </main>
       </div>
     </APIProvider>
