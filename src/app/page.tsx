@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useTransition } from "react";
@@ -36,6 +37,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 
 import {
@@ -404,9 +406,9 @@ const PageContent = () => {
                 <p className="text-muted-foreground">
                   Our AI provides the best routes, times, and tips.
                 </p>
-              </Card>
+              </card>
                <LiveReports reports={[]} />
-               <WeatherCard weather={{ temp: 28, description: 'Partly Cloudy' }} />
+               <WeatherCard weather={{ temp: 28, description: 'Partly Cloudy', icon: '02d' }} />
             </>
           )}
         </div>
@@ -435,8 +437,8 @@ const PageContent = () => {
         </Card>
       </main>
     </div>
-  )
-}
+  );
+};
 
 export default function Home() {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
