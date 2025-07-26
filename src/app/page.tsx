@@ -286,7 +286,7 @@ const PageContent = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
     startTransition(async () => {
       setAdvice(null);
       setRoute(null);
@@ -305,7 +305,7 @@ const PageContent = () => {
         });
       }
     });
-  }
+  };
   
   return (
     <div className="min-h-screen bg-background text-foreground">
