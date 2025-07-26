@@ -12,7 +12,9 @@ export async function getTravelAdvice(data: {
     const { origin, destination } = data;
 
     // In a real application, these would be fetched from live data sources.
-    const staticDataForAlerts = {
+    const staticData = {
+      trafficData: "Heavy congestion at Silk Board junction, 45-60 min delays",
+      weatherData: "Light showers expected 3-5 PM, potential waterlogging on ORR",
       currentTrafficConditions: "moderate",
       weatherConditions: "Partly cloudy, 28°C",
       liveTrafficReports: [
@@ -24,8 +26,8 @@ export async function getTravelAdvice(data: {
 
     // Using Promise.all to run AI flows in parallel for better performance
     const [routeAnalysis, predictiveAlerts] = await Promise.all([
-      analyzeRoute({ origin, destination }),
-      getPredictiveAlerts({ origin, destination, ...staticDataForAlerts }),
+      analyzeRoute({ origin, destination, trafficData: staticData.trafficData, weatherData: staticData.weatherData }),
+      getPredictiveAlerts({ origin, destination, currentTrafficConditions: staticData.currentTrafficConditions, weatherConditions: staticData.weatherConditions, liveTrafficReports: staticData.liveTrafficReports }),
     ]);
 
     return { routeAnalysis, predictiveAlerts };

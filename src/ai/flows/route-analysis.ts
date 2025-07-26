@@ -13,13 +13,21 @@ import {z} from 'genkit';
 const RouteAnalysisInputSchema = z.object({
   origin: z.string().describe('The starting point of the route.'),
   destination: z.string().describe('The end point of the route.'),
+  trafficData: z.string().describe('Current traffic conditions, e.g., "Heavy congestion at Silk Board junction, 45-60 min delays"'),
+  weatherData: z.string().describe('Current weather conditions, e.g., "Light showers expected 3-5 PM, potential waterlogging on ORR"'),
 });
 export type RouteAnalysisInput = z.infer<typeof RouteAnalysisInputSchema>;
 
 const RouteAnalysisOutputSchema = z.object({
-  optimalRoute: z.string().describe('The recommended route based on analysis.'),
-  estimatedTravelTime: z.string().describe('The estimated travel time for the optimal route.'),
-  summary: z.string().describe('A summary of the route analysis, including traffic, weather, and real-time reports.'),
+  trafficAnalysis: z.string().describe('A summary of the current traffic situation between the origin and destination.'),
+  weatherImpact: z.string().describe('An analysis of how the current and predicted weather will impact the route.'),
+  aiRecommendation: z.object({
+      primary: z.string().describe('The main recommended route or action.'),
+      alternative: z.string().describe('An alternative route or mode of transport.'),
+      avoid: z.string().describe('Specific routes or areas to avoid.'),
+  }),
+  bestDepartureTime: z.string().describe('The suggested best time to start the journey.'),
+  prediction: z.string().describe('A prediction of how traffic is likely to change.'),
 });
 export type RouteAnalysisOutput = z.infer<typeof RouteAnalysisOutputSchema>;
 
@@ -27,36 +35,47 @@ export async function analyzeRoute(input: RouteAnalysisInput): Promise<RouteAnal
   return analyzeRouteFlow(input);
 }
 
-const getRouteAnalysis = ai.defineTool(
-  {
-    name: 'getRouteAnalysis',
-    description: 'Returns the optimal route, estimated travel time, and a summary based on traffic, weather, and real-time reports.',
-    inputSchema: z.object({
-      origin: z.string().describe('The starting point of the route.'),
-      destination: z.string().describe('The end point of the route.'),
-    }),
-    outputSchema: RouteAnalysisOutputSchema,
-  },
-  async (input) => {
-    // Placeholder implementation for route analysis
-    return {
-      optimalRoute: `Simulated route from ${input.origin} to ${input.destination}`,
-      estimatedTravelTime: 'Approximately 30 minutes',
-      summary: 'Light traffic and clear weather conditions are expected.',
-    };
-  }
+const routeAnalysisTool = ai.defineTool(
+    {
+        name: 'getRouteAnalysis',
+        description: 'Generates optimal route advice for Bengaluru travel from origin to destination.',
+        inputSchema: RouteAnalysisInputSchema,
+        outputSchema: RouteAnalysisOutputSchema,
+    },
+    async (input) => {
+        // Placeholder implementation for route analysis. In a real app, this would
+        // involve complex logic combining data from multiple sources.
+        return {
+            trafficAnalysis: `Simulated analysis: Traffic is currently heavy on the Outer Ring Road near ${input.origin}. ${input.trafficData}.`,
+            weatherImpact: `Simulated impact: ${input.weatherData} could lead to slower speeds and reduced visibility.`,
+            aiRecommendation: {
+                primary: `Take the NICE Road to bypass city center traffic.`,
+                alternative: `Consider using the Namma Metro Green Line towards ${input.destination}.`,
+                avoid: `Avoid Silk Board junction due to a reported accident.`,
+            },
+            bestDepartureTime: 'Leave before 3 PM or after 8 PM to avoid peak hours.',
+            prediction: 'Traffic is expected to worsen in the next hour due to evening rush.',
+        };
+    }
 );
+
 
 const prompt = ai.definePrompt({
   name: 'routeAnalysisPrompt',
-  tools: [getRouteAnalysis],
+  tools: [routeAnalysisTool],
   input: {schema: RouteAnalysisInputSchema},
   output: {schema: RouteAnalysisOutputSchema},
-  prompt: `Based on the origin and destination provided, analyze the optimal route considering current traffic, weather conditions, and any real-time reports.
+  prompt: `Generate optimal route advice for a trip in Bengaluru from {{{origin}}} to {{{destination}}}.
 
-Use the getRouteAnalysis tool to obtain the route analysis for the given origin and destination.
+You MUST use the getRouteAnalysis tool to get the analysis.
 
-Return the optimal route, estimated travel time, and a summary of the analysis. Focus on providing the user with all key data points so they can make a go/no-go decision.`,
+Pass the following information to the tool:
+- origin: {{{origin}}}
+- destination: {{{destination}}}
+- trafficData: {{{trafficData}}}
+- weatherData: {{{weatherData}}}
+
+Synthesize the tool's output to provide a clear, actionable travel plan. The response should consider all factors to give the user a comprehensive understanding of their journey.`,
 });
 
 const analyzeRouteFlow = ai.defineFlow(

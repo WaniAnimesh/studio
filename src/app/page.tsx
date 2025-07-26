@@ -30,7 +30,11 @@ import {
   Car,
   TrafficCone,
   TriangleAlert,
-  Info
+  Info,
+  Lightbulb,
+  CloudRain,
+  ShieldAlert,
+  CalendarClock
 } from "lucide-react";
 
 const formSchema = z.object({
@@ -42,19 +46,39 @@ const AnalysisResult = ({ analysis }: { analysis: TravelAdvice["routeAnalysis"] 
   <Card>
     <CardHeader>
       <CardTitle className="flex items-center gap-2"><Route className="text-primary" /> AI Route Analysis</CardTitle>
+      <CardDescription>{analysis.prediction}</CardDescription>
     </CardHeader>
-    <CardContent className="space-y-4">
-      <div>
-        <h3 className="font-semibold text-muted-foreground">Optimal Route</h3>
-        <p>{analysis.optimalRoute}</p>
+    <CardContent className="space-y-6">
+      <div className="space-y-2">
+        <h3 className="font-semibold flex items-center gap-2 text-muted-foreground"><TrafficCone size={18}/> Current Traffic</h3>
+        <p className="pl-7">{analysis.trafficAnalysis}</p>
       </div>
-      <div>
-        <h3 className="font-semibold text-muted-foreground">Estimated Travel Time</h3>
-        <p>{analysis.estimatedTravelTime}</p>
+      <div className="space-y-2">
+        <h3 className="font-semibold flex items-center gap-2 text-muted-foreground"><CloudRain size={18}/> Weather Impact</h3>
+        <p className="pl-7">{analysis.weatherImpact}</p>
       </div>
-      <div>
-        <h3 className="font-semibold text-muted-foreground">Summary</h3>
-        <p>{analysis.summary}</p>
+       <Separator/>
+      <div className="space-y-3 p-4 bg-primary/10 rounded-lg">
+        <h3 className="font-semibold flex items-center gap-2"><Lightbulb size={18} className="text-primary"/> AI Recommendation</h3>
+        <ul className="space-y-2 pl-7 text-sm">
+          <li className="flex items-start gap-2">
+            <span className="font-bold text-primary shrink-0">Primary:</span>
+            <span>{analysis.aiRecommendation.primary}</span>
+          </li>
+           <li className="flex items-start gap-2">
+            <span className="font-bold text-accent shrink-0">Alternative:</span>
+             <span>{analysis.aiRecommendation.alternative}</span>
+          </li>
+           <li className="flex items-start gap-2">
+            <span className="font-bold text-destructive shrink-0">Avoid:</span>
+             <span>{analysis.aiRecommendation.avoid}</span>
+          </li>
+        </ul>
+      </div>
+      <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
+        <CalendarClock size={16} />
+        <span className="font-semibold">Best Departure:</span>
+        <span>{analysis.bestDepartureTime}</span>
       </div>
     </CardContent>
   </Card>
@@ -105,7 +129,7 @@ const getAlertIcon = (type: string) => {
     case 'accident': return <TriangleAlert className="text-destructive" />;
     case 'road closure': return <TrafficCone className="text-orange-500" />;
     case 'congestion': return <Car className="text-yellow-500" />;
-    default: return <Info className="text-primary" />;
+    default: return <ShieldAlert className="text-primary" />;
   }
 };
 
@@ -120,12 +144,21 @@ const AlertsDisplay = ({ alerts }: { alerts: Alert[] }) => (
               <div className="pt-1">{getAlertIcon(alert.type)}</div>
               <div className="flex-1">
                 <div className="flex justify-between items-start">
-                  <h3 className="font-bold">{alert.type}</h3>
-                  <Badge variant={alert.relevance > 0.7 ? "destructive" : alert.relevance > 0.4 ? "secondary" : "default"} className="capitalize">{alert.relevance > 0.7 ? "High" : alert.relevance > 0.4 ? "Medium" : "Low"} Relevance</Badge>
+                  <h3 className="font-bold capitalize">{alert.type}</h3>
+                  <Badge variant={alert.relevance > 0.7 ? "destructive" : alert.relevance > 0.4 ? "secondary" : "default"} className="capitalize">{alert.relevance > 0.7 ? "High" : alert.relevance > 0.4 ? "Medium" : "Low"} Rel.</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">{alert.location}</p>
                 <p className="text-sm mt-2">{alert.description}</p>
-                <Progress value={alert.relevance * 100} className="mt-3 h-2" />
+                <div className="mt-3 text-xs text-muted-foreground">
+                    <p><span className="font-semibold">Action:</span> {alert.recommendedAction}</p>
+                </div>
+                <div className="mt-3 space-y-1">
+                   <div className="flex justify-between items-center text-xs text-muted-foreground">
+                    <span>Confidence</span>
+                    <span>{(alert.confidence * 100).toFixed(0)}%</span>
+                   </div>
+                   <Progress value={alert.confidence * 100} className="h-2" />
+                </div>
               </div>
             </div>
           </CardContent>
@@ -138,12 +171,26 @@ const AlertsDisplay = ({ alerts }: { alerts: Alert[] }) => (
 const LoadingSkeletons = () => (
   <div className="space-y-6">
     <Card>
-      <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
-      <CardContent className="space-y-3">
-        <Skeleton className="h-4 w-1/3" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-1/3" />
+      <CardHeader>
+        <Skeleton className="h-6 w-1/2" />
         <Skeleton className="h-4 w-3/4" />
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+            <Skeleton className="h-5 w-1/3" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+        </div>
+        <div className="space-y-2">
+            <Skeleton className="h-5 w-1/3" />
+            <Skeleton className="h-4 w-full" />
+        </div>
+         <div className="space-y-2 pt-4">
+            <Skeleton className="h-5 w-1/4" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-1/2" />
+        </div>
       </CardContent>
     </Card>
   </div>
@@ -224,7 +271,7 @@ export default function Home() {
                     )}
                   />
                   <Button type="submit" className="w-full" disabled={isPending}>
-                    {isPending ? <LoaderCircle className="animate-spin" /> : "Analyze Route"}
+                    {isPending ? <LoaderCircle className="animate-spin" /> : "Get AI Route Advice"}
                   </Button>
                 </form>
               </Form>
@@ -247,10 +294,10 @@ export default function Home() {
             {isPending && <div className="flex items-center justify-center h-full"><LoaderCircle className="animate-spin text-primary" size={32}/></div>}
             {advice?.predictiveAlerts ? <AlertsDisplay alerts={advice.predictiveAlerts.alerts} /> : 
              !isPending && (
-                <div className="flex flex-col items-center justify-center h-full text-center">
+                <div className="flex flex-col items-center justify-center h-full text-center p-8">
                     <MapIcon size={48} className="text-muted-foreground mb-4"/>
                     <h3 className="text-lg font-semibold">Ready for Adventure?</h3>
-                    <p className="text-muted-foreground">Enter your route to see live map data and alerts.</p>
+                    <p className="text-muted-foreground">Enter your route to see live map data and AI-powered travel advice.</p>
                 </div>
              )
             }
