@@ -1,4 +1,4 @@
-# Bengaluru Travel Advisory
+# Namma Pulse
 
 This is a full-stack, real-time travel advisory system for Bengaluru that combines AI-powered analysis with live data collection to provide actionable route recommendations. The application ingests traffic and weather data from multiple sources, uses Google's Gemini AI for intelligent analysis, and presents insights through an interactive dashboard with map visualization.
 

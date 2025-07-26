@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'Bengaluru Travel Advisory',
+  title: 'Namma Pulse',
   description: 'AI-powered travel advisory for Bengaluru',
 };
 
