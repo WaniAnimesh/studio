@@ -4,7 +4,6 @@ import React, { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { User } from 'firebase/auth';
 import { collection, addDoc, serverTimestamp, GeoPoint } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
@@ -25,11 +24,7 @@ const reportSchema = z.object({
 
 type ReportFormValues = z.infer<typeof reportSchema>;
 
-interface NewReportFormProps {
-  user: User;
-}
-
-export function NewReportForm({ user }: NewReportFormProps) {
+export function NewReportForm() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -83,7 +78,7 @@ export function NewReportForm({ user }: NewReportFormProps) {
     setIsLoading(true);
     try {
       // 1. Upload image to Storage
-      const imagePath = `reports/${user.uid}/${Date.now()}-${imageFile.name}`;
+      const imagePath = `reports/anonymous/${Date.now()}-${imageFile.name}`;
       const storageRef = ref(storage, imagePath);
       await uploadBytes(storageRef, imageFile);
 
@@ -97,7 +92,7 @@ export function NewReportForm({ user }: NewReportFormProps) {
         imageUrl: imageUrl,
         location: new GeoPoint(location.lat, location.lon),
         status: 'Submitted',
-        userId: user.uid,
+        userId: 'anonymous',
         createdAt: serverTimestamp(),
       });
 
