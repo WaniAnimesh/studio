@@ -4,7 +4,7 @@ import React, { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { APIProvider } from "@vis.gl/react-google-maps";
+import { APIProvider, useMapsLibrary } from "@vis.gl/react-google-maps";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +14,6 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -29,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getTravelAdvice } from "./actions";
 import type { TravelAdvice } from "@/types";
 import { MapView } from "@/components/map-view";
+import { LocationInput } from "@/components/location-input";
 
 import {
   Clock,
@@ -193,7 +193,7 @@ const LoadingSkeletons = () => (
   </>
 );
 
-export default function Home() {
+const PageContent = () => {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const [advice, setAdvice] = useState<TravelAdvice | null>(null);
@@ -227,123 +227,135 @@ export default function Home() {
       }
     });
   }
+  
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-primary tracking-tight">
+            Namma Pulse
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Your AI guide to navigating Bengaluru.
+          </p>
+        </div>
 
+        <Card className="mb-6 shadow-lg">
+          <CardContent className="p-4">
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="flex flex-col sm:flex-row items-center gap-4"
+              >
+                <div className="flex-grow w-full">
+                  <FormField
+                    control={form.control}
+                    name="origin"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="sr-only">Origin</FormLabel>
+                        <FormControl>
+                          <LocationInput 
+                            placeholder="Enter Origin" 
+                            onPlaceSelect={(place) => field.onChange(place?.formatted_address || '')}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="flex-grow w-full">
+                  <FormField
+                    control={form.control}
+                    name="destination"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="sr-only">Destination</FormLabel>
+                        <FormControl>
+                           <LocationInput 
+                            placeholder="Enter Destination" 
+                            onPlaceSelect={(place) => field.onChange(place?.formatted_address || '')}
+                           />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full sm:w-auto"
+                  disabled={isPending}
+                  size="lg"
+                >
+                  {isPending ? (
+                    <LoaderCircle className="animate-spin" />
+                  ) : (
+                    "Get AI Route Advice"
+                  )}
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {isPending && <LoadingSkeletons />}
+          {advice?.routeAnalysis && (
+            <>
+              <AnalysisResult analysis={advice.routeAnalysis} />
+              <RecommendationResult analysis={advice.routeAnalysis} />
+            </>
+          )}
+          {!isPending && !advice && (
+            <>
+              <Card className="flex flex-col items-center justify-center text-center p-8 h-full">
+                <Route size={48} className="text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold">Ready for Adventure?</h3>
+                <p className="text-muted-foreground">
+                  Enter your route to see AI-powered travel advice.
+                </p>
+              </Card>
+              <Card className="flex flex-col items-center justify-center text-center p-8 h-full">
+                <Lightbulb size={48} className="text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold">
+                  Get Smart Recommendations
+                </h3>
+                <p className="text-muted-foreground">
+                  Our AI provides the best routes, times, and tips.
+                </p>
+              </Card>
+            </>
+          )}
+          <LiveReports />
+          <WeatherCard />
+        </div>
+
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MapIcon className="text-primary" /> Visual Route Overview
+            </CardTitle>
+            <CardDescription>
+              A glance at your travel route on the map.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[400px] md:h-[500px] rounded-lg overflow-hidden border">
+              <MapView origin={route?.origin} destination={route?.destination} />
+            </div>
+          </CardContent>
+        </Card>
+      </main>
+    </div>
+  )
+}
+
+export default function Home() {
   return (
     <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""}>
-      <div className="min-h-screen bg-background text-foreground">
-        <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-primary tracking-tight">
-              Namma Pulse
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              Your AI guide to navigating Bengaluru.
-            </p>
-          </div>
-
-          <Card className="mb-6 shadow-lg">
-            <CardContent className="p-4">
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="flex flex-col sm:flex-row items-center gap-4"
-                >
-                  <div className="flex-grow w-full">
-                    <FormField
-                      control={form.control}
-                      name="origin"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="sr-only">Origin</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter Origin" {...field} className="text-base"/>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="flex-grow w-full">
-                    <FormField
-                      control={form.control}
-                      name="destination"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="sr-only">Destination</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter Destination" {...field} className="text-base"/>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    className="w-full sm:w-auto"
-                    disabled={isPending}
-                    size="lg"
-                  >
-                    {isPending ? (
-                      <LoaderCircle className="animate-spin" />
-                    ) : (
-                      "Get AI Route Advice"
-                    )}
-                  </Button>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {isPending && <LoadingSkeletons />}
-            {advice?.routeAnalysis && (
-              <>
-                <AnalysisResult analysis={advice.routeAnalysis} />
-                <RecommendationResult analysis={advice.routeAnalysis} />
-              </>
-            )}
-            {!isPending && !advice && (
-              <>
-                <Card className="flex flex-col items-center justify-center text-center p-8 h-full">
-                  <Route size={48} className="text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold">Ready for Adventure?</h3>
-                  <p className="text-muted-foreground">
-                    Enter your route to see AI-powered travel advice.
-                  </p>
-                </Card>
-                <Card className="flex flex-col items-center justify-center text-center p-8 h-full">
-                  <Lightbulb size={48} className="text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold">
-                    Get Smart Recommendations
-                  </h3>
-                  <p className="text-muted-foreground">
-                    Our AI provides the best routes, times, and tips.
-                  </p>
-                </Card>
-              </>
-            )}
-            <LiveReports />
-            <WeatherCard />
-          </div>
-
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapIcon className="text-primary" /> Visual Route Overview
-              </CardTitle>
-              <CardDescription>
-                A glance at your travel route on the map.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[400px] md:h-[500px] rounded-lg overflow-hidden border">
-                <MapView origin={route?.origin} destination={route?.destination} />
-              </div>
-            </CardContent>
-          </Card>
-        </main>
-      </div>
+      <PageContent />
     </APIProvider>
   );
 }
