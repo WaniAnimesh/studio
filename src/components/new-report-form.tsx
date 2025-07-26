@@ -70,6 +70,8 @@ export function NewReportForm() {
         const compressedReader = new FileReader();
         compressedReader.onloadend = () => {
             const compressedDataUri = compressedReader.result as string;
+            // Also use the compressed version for the preview to save space in Firestore
+            setImagePreview(compressedDataUri); 
             startAiTransition(async () => {
                 form.setValue('description', 'Generating description...');
                 form.setValue('department', '');
@@ -112,7 +114,7 @@ export function NewReportForm() {
   };
 
   const onSubmit = async (data: ReportFormValues) => {
-    if (!imageFile) {
+    if (!imagePreview) {
       toast({ variant: 'destructive', title: 'Error', description: 'Please upload an image.' });
       return;
     }
@@ -123,19 +125,20 @@ export function NewReportForm() {
 
     setIsLoading(true);
     try {
-      // 1. Upload image to Storage (now using compressed image)
-      const imagePath = `reports/anonymous/${Date.now()}-${imageFile.name}`;
-      const storageRef = ref(storage, imagePath);
-      await uploadBytes(storageRef, imageFile);
+      // The image upload logic is removed. We will save the data URI directly.
+      // // 1. Upload image to Storage (now using compressed image)
+      // const imagePath = `reports/anonymous/${Date.now()}-${imageFile.name}`;
+      // const storageRef = ref(storage, imagePath);
+      // await uploadBytes(storageRef, imageFile);
 
-      // 2. Get image URL
-      const imageUrl = await getDownloadURL(storageRef);
+      // // 2. Get image URL
+      // const imageUrl = await getDownloadURL(storageRef);
 
       // 3. Save report to Firestore
       await addDoc(collection(db, 'reports'), {
         description: data.description,
         department: data.department,
-        imageUrl: imageUrl,
+        imageUrl: imagePreview, // Save the base64 data URI
         location: new GeoPoint(location.lat, location.lon),
         status: 'Submitted',
         userId: 'anonymous',
