@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { CivicReporter } from "@/components/civic-reporter";
 
 import {
   CloudSun,
@@ -106,18 +107,15 @@ const RecommendationResult = ({
       </CardDescription>
     </CardHeader>
     <CardContent className="space-y-4 text-sm">
-      <div className="space-y-1">
-        <p className="font-bold text-primary">Primary:</p>
-        <p>{analysis.aiRecommendation.primary}</p>
-      </div>
-      <div className="space-y-1">
-        <p className="font-bold text-accent">Alternative:</p>
-        <p>{analysis.aiRecommendation.alternative}</p>
-      </div>
-      <div className="space-y-1">
-        <p className="font-bold text-destructive">Avoid:</p>
-        <p>{analysis.aiRecommendation.avoid}</p>
-      </div>
+      <p>
+        <span className="font-bold text-primary">Primary:</span> {analysis.aiRecommendation.primary}
+      </p>
+      <p>
+        <span className="font-bold text-accent">Alternative:</span> {analysis.aiRecommendation.alternative}
+      </p>
+      <p>
+        <span className="font-bold text-destructive">Avoid:</span> {analysis.aiRecommendation.avoid}
+      </p>
       <Separator />
       <div className="flex items-center gap-2 text-muted-foreground">
         <CalendarClock size={16} />
@@ -459,7 +457,7 @@ const PageContent = () => {
             </div>
           )}
 
-        <Card className="shadow-lg">
+        <Card className="shadow-lg mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MapIcon className="text-primary" /> Visual Route Overview
@@ -477,6 +475,8 @@ const PageContent = () => {
             </div>
           </CardContent>
         </Card>
+
+        <CivicReporter />
       </main>
     </div>
   );
