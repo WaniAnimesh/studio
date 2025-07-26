@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useTransition } from "react";
@@ -110,15 +111,15 @@ const RecommendationResult = ({
     <CardContent className="space-y-4 text-sm">
       <div>
         <span className="font-bold text-primary">Primary:</span>
-        <p className="inline"> {analysis.aiRecommendation.primary}</p>
+        <p>{analysis.aiRecommendation.primary}</p>
       </div>
       <div>
         <span className="font-bold text-accent">Alternative:</span>
-        <p className="inline"> {analysis.aiRecommendation.alternative}</p>
+        <p>{analysis.aiRecommendation.alternative}</p>
       </div>
       <div>
         <span className="font-bold text-destructive">Avoid:</span>
-        <p className="inline"> {analysis.aiRecommendation.avoid}</p>
+        <p>{analysis.aiRecommendation.avoid}</p>
       </div>
       <Separator />
       <div className="flex items-center gap-2 text-muted-foreground">
@@ -492,12 +493,12 @@ const PageContent = () => {
             </div>
             <div className="w-full md:w-1/2">
               <Image
-                src="https://placehold.co/600x400.png"
-                alt="Braess' Paradox visualization"
+                src="https://firebasestorage.googleapis.com/v0/b/bengaluru-travel-advisory.appspot.com/o/braess-paradox.png?alt=media&token=e9f4a9c6-1e4e-4e89-8059-1e967a983445"
+                alt="Braess' Paradox visualization of Bengaluru map"
                 width={600}
                 height={400}
                 className="rounded-lg object-cover"
-                data-ai-hint="city map"
+                data-ai-hint="city map traffic"
               />
             </div>
           </CardContent>
@@ -525,3 +526,5 @@ export default function Home() {
     </APIProvider>
   );
 }
+
+    
