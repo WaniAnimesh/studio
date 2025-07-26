@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useTransition } from "react";
@@ -35,10 +34,9 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
+} from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
 
 import {
   CloudSun,
@@ -56,8 +54,12 @@ import {
 } from "lucide-react";
 
 const formSchema = z.object({
-  origin: z.string().min(3, { message: "Origin must be at least 3 characters." }),
-  destination: z.string().min(3, { message: "Destination must be at least 3 characters." }),
+  origin: z
+    .string()
+    .min(3, { message: "Origin must be at least 3 characters." }),
+  destination: z
+    .string()
+    .min(3, { message: "Destination must be at least 3 characters." }),
 });
 
 const AnalysisResult = ({
@@ -99,27 +101,25 @@ const RecommendationResult = ({
       <CardTitle className="flex items-center gap-2">
         <Lightbulb className="text-primary" /> AI Recommendation
       </CardTitle>
-      <CardDescription>Optimal travel advice based on current data.</CardDescription>
+      <CardDescription>
+        Optimal travel advice based on current data.
+      </CardDescription>
     </CardHeader>
-    <CardContent className="space-y-4">
-      <ul className="space-y-3 text-sm">
-        <li className="flex items-start gap-3">
-          <span className="font-bold text-primary shrink-0 pt-0.5">Primary:</span>
-          <span>{analysis.aiRecommendation.primary}</span>
-        </li>
-        <li className="flex items-start gap-3">
-          <span className="font-bold text-accent shrink-0 pt-0.5">Alternative:</span>
-          <span>{analysis.aiRecommendation.alternative}</span>
-        </li>
-        <li className="flex items-start gap-3">
-          <span className="font-bold text-destructive shrink-0 pt-0.5">
-            Avoid:
-          </span>
-          <span>{analysis.aiRecommendation.avoid}</span>
-        </li>
-      </ul>
+    <CardContent className="space-y-4 text-sm">
+      <div className="space-y-1">
+        <p className="font-bold text-primary">Primary:</p>
+        <p>{analysis.aiRecommendation.primary}</p>
+      </div>
+      <div className="space-y-1">
+        <p className="font-bold text-accent">Alternative:</p>
+        <p>{analysis.aiRecommendation.alternative}</p>
+      </div>
+      <div className="space-y-1">
+        <p className="font-bold text-destructive">Avoid:</p>
+        <p>{analysis.aiRecommendation.avoid}</p>
+      </div>
       <Separator />
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <div className="flex items-center gap-2 text-muted-foreground">
         <CalendarClock size={16} />
         <span className="font-semibold">Best Departure:</span>
         <span>{analysis.bestDepartureTime}</span>
@@ -128,7 +128,7 @@ const RecommendationResult = ({
   </Card>
 );
 
-const WeatherCard = ({ weather }: { weather: TravelAdvice['weather']}) => (
+const WeatherCard = ({ weather }: { weather: TravelAdvice["weather"] }) => (
   <Card className="h-full">
     <CardHeader>
       <CardTitle className="flex items-center gap-2">
@@ -153,22 +153,29 @@ const LiveReports = ({ reports }: { reports: string[] }) => {
         <CardTitle className="flex items-center gap-2">
           <Car className="text-primary" /> Live Traffic Reports
         </CardTitle>
-        <CardDescription>Real-time updates from various sources.</CardDescription>
+        <CardDescription>
+          Real-time updates from various sources.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {reports.length > 0 ? (
           <ScrollArea className="h-48">
-             <ul className="space-y-3">
+            <ul className="space-y-3">
               {reports.map((report, index) => (
                 <li key={index} className="flex items-start gap-3 text-sm pr-4">
-                  <Info size={16} className="mt-1 text-muted-foreground shrink-0" />
+                  <Info
+                    size={16}
+                    className="mt-1 text-muted-foreground shrink-0"
+                  />
                   <span>{report}</span>
                 </li>
               ))}
             </ul>
           </ScrollArea>
         ) : (
-          <p className="text-sm text-muted-foreground">No live reports available at the moment.</p>
+          <p className="text-sm text-muted-foreground">
+            No live reports available at the moment.
+          </p>
         )}
       </CardContent>
     </Card>
@@ -177,13 +184,18 @@ const LiveReports = ({ reports }: { reports: string[] }) => {
 
 const getAlertVariant = (type: string) => {
   switch (type.toLowerCase()) {
-    case 'accident': return 'destructive';
-    case 'road closure': return 'destructive';
-    case 'congestion': return 'default';
-    case 'weather warning': return 'default';
-    default: return 'secondary';
+    case "accident":
+      return "destructive";
+    case "road closure":
+      return "destructive";
+    case "congestion":
+      return "default";
+    case "weather warning":
+      return "default";
+    default:
+      return "secondary";
   }
-}
+};
 
 const PredictiveAlerts = ({ alerts }: { alerts: Alert[] }) => (
   <Card>
@@ -201,24 +213,37 @@ const PredictiveAlerts = ({ alerts }: { alerts: Alert[] }) => (
               <AccordionTrigger>
                 <div className="flex items-center gap-2 text-left">
                   <TriangleAlert className="text-destructive shrink-0" />
-                  <span>{alert.location}: {alert.type}</span>
+                  <span>
+                    {alert.location}: {alert.type}
+                  </span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="space-y-2">
                 <p>{alert.description}</p>
                 <div className="flex flex-wrap gap-2 text-xs">
-                  <Badge variant={getAlertVariant(alert.type)}>{alert.type}</Badge>
-                  <Badge variant="secondary">Relevance: {Math.round(alert.relevance * 100)}%</Badge>
-                  <Badge variant="secondary">Confidence: {Math.round(alert.confidence * 100)}%</Badge>
+                  <Badge variant={getAlertVariant(alert.type)}>
+                    {alert.type}
+                  </Badge>
+                  <Badge variant="secondary">
+                    Relevance: {Math.round(alert.relevance * 100)}%
+                  </Badge>
+                  <Badge variant="secondary">
+                    Confidence: {Math.round(alert.confidence * 100)}%
+                  </Badge>
                 </div>
-                 <Separator />
-                <p className="text-sm font-semibold">Recommended Action: <span className="font-normal">{alert.recommendedAction}</span></p>
+                <Separator />
+                <p className="text-sm font-semibold">
+                  Recommended Action:{" "}
+                  <span className="font-normal">{alert.recommendedAction}</span>
+                </p>
               </AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
       ) : (
-        <p className="text-sm text-muted-foreground">No predictive alerts for your route at the moment.</p>
+        <p className="text-sm text-muted-foreground">
+          No predictive alerts for your route at the moment.
+        </p>
       )}
     </CardContent>
   </Card>
@@ -248,7 +273,7 @@ const LoadingSkeletons = () => (
       </CardContent>
     </Card>
     <Card>
-       <CardHeader>
+      <CardHeader>
         <Skeleton className="h-6 w-1/2" />
         <Skeleton className="h-4 w-3/4" />
       </CardHeader>
@@ -257,8 +282,8 @@ const LoadingSkeletons = () => (
         <Skeleton className="h-4 w-5/6" />
       </CardContent>
     </Card>
-     <Card>
-       <CardHeader>
+    <Card>
+      <CardHeader>
         <Skeleton className="h-6 w-1/2" />
       </CardHeader>
       <CardContent className="flex gap-4 items-center">
@@ -276,7 +301,10 @@ const PageContent = () => {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const [advice, setAdvice] = useState<TravelAdvice | null>(null);
-  const [route, setRoute] = useState<{origin: string, destination: string} | null>(null);
+  const [route, setRoute] = useState<{
+    origin: string;
+    destination: string;
+  } | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -306,7 +334,7 @@ const PageContent = () => {
       }
     });
   };
-  
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -334,9 +362,11 @@ const PageContent = () => {
                       <FormItem>
                         <FormLabel className="sr-only">Origin</FormLabel>
                         <FormControl>
-                          <LocationInput 
-                            placeholder="Enter Origin" 
-                            onPlaceSelect={(place) => field.onChange(place?.formatted_address || '')}
+                          <LocationInput
+                            placeholder="Enter Origin"
+                            onPlaceSelect={(place) =>
+                              field.onChange(place?.formatted_address || "")
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -352,10 +382,12 @@ const PageContent = () => {
                       <FormItem>
                         <FormLabel className="sr-only">Destination</FormLabel>
                         <FormControl>
-                           <LocationInput 
-                            placeholder="Enter Destination" 
-                            onPlaceSelect={(place) => field.onChange(place?.formatted_address || '')}
-                           />
+                          <LocationInput
+                            placeholder="Enter Destination"
+                            onPlaceSelect={(place) =>
+                              field.onChange(place?.formatted_address || "")
+                            }
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -406,19 +438,26 @@ const PageContent = () => {
                 <p className="text-muted-foreground">
                   Our AI provides the best routes, times, and tips.
                 </p>
-              </card>
-               <LiveReports reports={[]} />
-               <WeatherCard weather={{ temp: 28, description: 'Partly Cloudy', icon: '02d', wind_speed: 0 }} />
+              </Card>
+              <LiveReports reports={[]} />
+              <WeatherCard
+                weather={{
+                  temp: 28,
+                  description: "Partly Cloudy",
+                  icon: "02d",
+                  wind_speed: 0,
+                }}
+              />
             </>
           )}
         </div>
-        
-        {advice?.predictiveAlerts?.alerts && advice.predictiveAlerts.alerts.length > 0 && (
-          <div className="mb-6">
-            <PredictiveAlerts alerts={advice.predictiveAlerts.alerts} />
-          </div>
-        )}
 
+        {advice?.predictiveAlerts?.alerts &&
+          advice.predictiveAlerts.alerts.length > 0 && (
+            <div className="mb-6">
+              <PredictiveAlerts alerts={advice.predictiveAlerts.alerts} />
+            </div>
+          )}
 
         <Card className="shadow-lg">
           <CardHeader>
@@ -431,7 +470,10 @@ const PageContent = () => {
           </CardHeader>
           <CardContent>
             <div className="h-[400px] md:h-[500px] rounded-lg overflow-hidden border">
-              <MapView origin={route?.origin} destination={route?.destination} />
+              <MapView
+                origin={route?.origin}
+                destination={route?.destination}
+              />
             </div>
           </CardContent>
         </Card>
@@ -445,9 +487,12 @@ export default function Home() {
   if (!apiKey) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <p className="text-red-500">Google Maps API key is missing. Please add it to your environment variables.</p>
+        <p className="text-red-500">
+          Google Maps API key is missing. Please add it to your environment
+          variables.
+        </p>
       </div>
-    )
+    );
   }
   return (
     <APIProvider apiKey={apiKey}>
