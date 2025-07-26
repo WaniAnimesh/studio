@@ -408,7 +408,7 @@ const PageContent = () => {
                 </p>
               </card>
                <LiveReports reports={[]} />
-               <WeatherCard weather={{ temp: 28, description: 'Partly Cloudy', icon: '02d' }} />
+               <WeatherCard weather={{ temp: 28, description: 'Partly Cloudy', icon: '02d', wind_speed: 0 }} />
             </>
           )}
         </div>
