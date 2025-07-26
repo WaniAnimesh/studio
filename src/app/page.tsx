@@ -27,7 +27,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { getTravelAdvice } from "./actions";
-import type { TravelAdvice, Alert } from "@/types";
+import type { TravelAdvice } from "@/types";
 import { MapView } from "@/components/map-view";
 
 import {
@@ -197,6 +197,7 @@ export default function Home() {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const [advice, setAdvice] = useState<TravelAdvice | null>(null);
+  const [route, setRoute] = useState<{origin: string, destination: string} | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -209,9 +210,11 @@ export default function Home() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     startTransition(async () => {
       setAdvice(null);
+      setRoute(null);
       try {
         const result = await getTravelAdvice(values);
         setAdvice(result);
+        setRoute(values);
       } catch (error) {
         toast({
           variant: "destructive",
@@ -335,7 +338,7 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <div className="h-[400px] md:h-[500px] rounded-lg overflow-hidden border">
-                <MapView />
+                <MapView origin={route?.origin} destination={route?.destination} />
               </div>
             </CardContent>
           </Card>
