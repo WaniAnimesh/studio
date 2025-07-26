@@ -54,12 +54,9 @@ const prompt = ai.definePrompt({
   output: {schema: RouteAnalysisOutputSchema},
   prompt: `Based on the origin and destination provided, analyze the optimal route considering current traffic, weather conditions, and any real-time reports.
 
-Origin: {{{origin}}}
-Destination: {{{destination}}}
+Use the getRouteAnalysis tool to obtain the route analysis for the given origin and destination.
 
-Use the getRouteAnalysis tool to obtain the route analysis.
-
-Return the optimal route, estimated travel time, and a summary of the analysis. Focus on providing the user with all key data points so they can make a go/no-go decision.`, 
+Return the optimal route, estimated travel time, and a summary of the analysis. Focus on providing the user with all key data points so they can make a go/no-go decision.`,
 });
 
 const analyzeRouteFlow = ai.defineFlow(
