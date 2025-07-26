@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { APIProvider } from "@vis.gl/react-google-maps";
+import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -107,15 +108,18 @@ const RecommendationResult = ({
       </CardDescription>
     </CardHeader>
     <CardContent className="space-y-4 text-sm">
-      <p>
-        <span className="font-bold text-primary">Primary:</span> {analysis.aiRecommendation.primary}
-      </p>
-      <p>
-        <span className="font-bold text-accent">Alternative:</span> {analysis.aiRecommendation.alternative}
-      </p>
-      <p>
-        <span className="font-bold text-destructive">Avoid:</span> {analysis.aiRecommendation.avoid}
-      </p>
+      <div>
+        <span className="font-bold text-primary">Primary:</span>
+        <p className="inline"> {analysis.aiRecommendation.primary}</p>
+      </div>
+      <div>
+        <span className="font-bold text-accent">Alternative:</span>
+        <p className="inline"> {analysis.aiRecommendation.alternative}</p>
+      </div>
+      <div>
+        <span className="font-bold text-destructive">Avoid:</span>
+        <p className="inline"> {analysis.aiRecommendation.avoid}</p>
+      </div>
       <Separator />
       <div className="flex items-center gap-2 text-muted-foreground">
         <CalendarClock size={16} />
@@ -477,6 +481,27 @@ const PageContent = () => {
         </Card>
 
         <CivicReporter />
+        
+        <Card className="shadow-lg mt-6">
+          <CardContent className="p-6 flex flex-col md:flex-row items-center gap-6">
+            <div className="w-full md:w-1/2">
+              <h3 className="text-lg font-semibold mb-2">Braess' Paradox (in progress):</h3>
+              <p className="text-sm text-muted-foreground">
+                Is the observation that adding one or more roads to a road network can slow down overall traffic flow through it.
+              </p>
+            </div>
+            <div className="w-full md:w-1/2">
+              <Image
+                src="https://placehold.co/600x400.png"
+                alt="Braess' Paradox visualization"
+                width={600}
+                height={400}
+                className="rounded-lg object-cover"
+                data-ai-hint="city map"
+              />
+            </div>
+          </CardContent>
+        </Card>
       </main>
     </div>
   );
