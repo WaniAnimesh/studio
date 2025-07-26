@@ -109,19 +109,19 @@ const RecommendationResult = ({
       </CardDescription>
     </CardHeader>
     <CardContent className="space-y-4 text-sm">
-      <div>
+      <div className="space-y-1">
         <span className="font-bold text-primary">Primary:</span>
         <p>{analysis.aiRecommendation.primary}</p>
       </div>
-      <div>
+      <div className="space-y-1">
         <span className="font-bold text-accent">Alternative:</span>
         <p>{analysis.aiRecommendation.alternative}</p>
       </div>
-      <div>
+      <div className="space-y-1">
         <span className="font-bold text-destructive">Avoid:</span>
         <p>{analysis.aiRecommendation.avoid}</p>
       </div>
-      <Separator />
+      <Separator className="my-4"/>
       <div className="flex items-center gap-2 text-muted-foreground">
         <CalendarClock size={16} />
         <span className="font-semibold">Best Departure:</span>
@@ -526,5 +526,3 @@ export default function Home() {
     </APIProvider>
   );
 }
-
-    
