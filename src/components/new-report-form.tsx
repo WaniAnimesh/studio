@@ -9,6 +9,8 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { generateDescriptionForImage } from '@/app/actions';
+import imageCompression from 'browser-image-compression';
+
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -44,29 +46,51 @@ export function NewReportForm() {
     },
   });
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setImageFile(file);
+      // Set preview immediately with original image
       const reader = new FileReader();
       reader.onloadend = () => {
         const dataUri = reader.result as string;
         setImagePreview(dataUri);
-        
-        startAiTransition(async () => {
-          form.setValue('description', 'Generating description...');
-          form.setValue('department', '');
-          const result = await generateDescriptionForImage(dataUri);
-          form.setValue('description', result.description);
-          
-          if (DEPARTMENTS.includes(result.department)) {
-            form.setValue('department', result.department);
-          } else {
-             form.setValue('department', 'Other');
-          }
-        });
       };
       reader.readAsDataURL(file);
+
+      // Compress image for AI analysis and storage
+      try {
+        const options = {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        };
+        const compressedFile = await imageCompression(file, options);
+        setImageFile(compressedFile); // Store compressed file for upload
+
+        const compressedReader = new FileReader();
+        compressedReader.onloadend = () => {
+            const compressedDataUri = compressedReader.result as string;
+            startAiTransition(async () => {
+                form.setValue('description', 'Generating description...');
+                form.setValue('department', '');
+                const result = await generateDescriptionForImage(compressedDataUri);
+                form.setValue('description', result.description);
+                
+                if (DEPARTMENTS.includes(result.department)) {
+                  form.setValue('department', result.department);
+                } else {
+                   form.setValue('department', 'Other');
+                }
+              });
+        };
+        compressedReader.readAsDataURL(compressedFile);
+
+      } catch (error) {
+        console.error('Image compression failed:', error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not process image.' });
+        // Fallback to original file if compression fails
+        setImageFile(file);
+      }
     }
   };
 
@@ -99,7 +123,7 @@ export function NewReportForm() {
 
     setIsLoading(true);
     try {
-      // 1. Upload image to Storage
+      // 1. Upload image to Storage (now using compressed image)
       const imagePath = `reports/anonymous/${Date.now()}-${imageFile.name}`;
       const storageRef = ref(storage, imagePath);
       await uploadBytes(storageRef, imageFile);
