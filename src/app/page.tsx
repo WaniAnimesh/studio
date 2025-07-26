@@ -102,10 +102,10 @@ const LiveReports = () => {
 
 const getAlertIcon = (type: string) => {
   switch (type.toLowerCase()) {
-    case 'accident': return <TriangleAlert className="text-red-500" />;
+    case 'accident': return <TriangleAlert className="text-destructive" />;
     case 'road closure': return <TrafficCone className="text-orange-500" />;
     case 'congestion': return <Car className="text-yellow-500" />;
-    default: return <Info className="text-blue-500" />;
+    default: return <Info className="text-primary" />;
   }
 };
 
