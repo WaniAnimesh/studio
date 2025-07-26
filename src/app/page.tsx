@@ -109,18 +109,9 @@ const RecommendationResult = ({
       </CardDescription>
     </CardHeader>
     <CardContent className="space-y-4 text-sm">
-      <div className="space-y-1">
-        <span className="font-bold text-primary">Primary:</span>
-        <p>{analysis.aiRecommendation.primary}</p>
-      </div>
-      <div className="space-y-1">
-        <span className="font-bold text-accent">Alternative:</span>
-        <p>{analysis.aiRecommendation.alternative}</p>
-      </div>
-      <div className="space-y-1">
-        <span className="font-bold text-destructive">Avoid:</span>
-        <p>{analysis.aiRecommendation.avoid}</p>
-      </div>
+      <p><span className="font-bold text-primary">Primary:</span> {analysis.aiRecommendation.primary}</p>
+      <p><span className="font-bold text-accent">Alternative:</span> {analysis.aiRecommendation.alternative}</p>
+      <p><span className="font-bold text-destructive">Avoid:</span> {analysis.aiRecommendation.avoid}</p>
       <Separator className="my-4"/>
       <div className="flex items-center gap-2 text-muted-foreground">
         <CalendarClock size={16} />
@@ -483,26 +474,6 @@ const PageContent = () => {
 
         <CivicReporter />
         
-        <Card className="shadow-lg mt-6">
-          <CardContent className="p-6 flex flex-col md:flex-row items-center gap-6">
-            <div className="w-full md:w-1/2">
-              <h3 className="text-lg font-semibold mb-2">Braess' Paradox (in progress):</h3>
-              <p className="text-sm text-muted-foreground">
-                Is the observation that adding one or more roads to a road network can slow down overall traffic flow through it.
-              </p>
-            </div>
-            <div className="w-full md:w-1/2">
-              <Image
-                src="https://firebasestorage.googleapis.com/v0/b/bengaluru-travel-advisory.appspot.com/o/braess-paradox.png?alt=media&token=e9f4a9c6-1e4e-4e89-8059-1e967a983445"
-                alt="Braess' Paradox visualization of Bengaluru map"
-                width={600}
-                height={400}
-                className="rounded-lg object-cover"
-                data-ai-hint="city map traffic"
-              />
-            </div>
-          </CardContent>
-        </Card>
       </main>
     </div>
   );
