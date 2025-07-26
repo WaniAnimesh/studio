@@ -4,9 +4,6 @@ import React, { useState, useRef, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { collection, addDoc, serverTimestamp, GeoPoint } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { generateDescriptionForImage } from '@/app/actions';
 import imageCompression from 'browser-image-compression';
@@ -124,44 +121,20 @@ export function NewReportForm() {
     }
 
     setIsLoading(true);
-    try {
-      // The image upload logic is removed. We will save the data URI directly.
-      // // 1. Upload image to Storage (now using compressed image)
-      // const imagePath = `reports/anonymous/${Date.now()}-${imageFile.name}`;
-      // const storageRef = ref(storage, imagePath);
-      // await uploadBytes(storageRef, imageFile);
 
-      // // 2. Get image URL
-      // const imageUrl = await getDownloadURL(storageRef);
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // 3. Save report to Firestore
-      await addDoc(collection(db, 'reports'), {
-        description: data.description,
-        department: data.department,
-        imageUrl: imagePreview, // Save the base64 data URI
-        location: new GeoPoint(location.lat, location.lon),
-        status: 'Submitted',
-        userId: 'anonymous',
-        createdAt: serverTimestamp(),
-      });
-
-      toast({ title: 'Success', description: 'Report submitted successfully!' });
-      // Reset form
-      form.reset();
-      setImageFile(null);
-      setImagePreview(null);
-      setLocation(null);
-      if(fileInputRef.current) fileInputRef.current.value = "";
-
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Submission Failed',
-        description: error.message,
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    toast({ title: 'Success', description: 'Report submitted successfully!' });
+    
+    // Reset form
+    form.reset();
+    setImageFile(null);
+    setImagePreview(null);
+    setLocation(null);
+    if(fileInputRef.current) fileInputRef.current.value = "";
+    
+    setIsLoading(false);
   };
 
   return (
