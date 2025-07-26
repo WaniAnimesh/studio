@@ -4,7 +4,7 @@ import React, { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { APIProvider, useMapsLibrary } from "@vis.gl/react-google-maps";
+import { APIProvider } from "@vis.gl/react-google-maps";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,17 +26,20 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { getTravelAdvice } from "./actions";
-import type { TravelAdvice } from "@/types";
+import type { TravelAdvice, Alert } from "@/types";
 import { MapView } from "@/components/map-view";
 import { LocationInput } from "@/components/location-input";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import { Badge } from "@/components/ui/badge";
+
 
 import {
-  Clock,
   CloudSun,
-  Flag,
-  LoaderCircle,
-  MapIcon,
-  MapPin,
   Route,
   Car,
   TrafficCone,
@@ -46,6 +49,8 @@ import {
   CloudRain,
   ShieldAlert,
   CalendarClock,
+  LoaderCircle,
+  MapIcon,
 } from "lucide-react";
 
 const formSchema = z.object({
@@ -121,7 +126,7 @@ const RecommendationResult = ({
   </Card>
 );
 
-const WeatherCard = () => (
+const WeatherCard = ({ weather }: { weather: TravelAdvice['weather']}) => (
   <Card className="h-full">
     <CardHeader>
       <CardTitle className="flex items-center gap-2">
@@ -132,19 +137,14 @@ const WeatherCard = () => (
     <CardContent className="flex items-center gap-4">
       <CloudSun size={48} className="text-yellow-500" />
       <div>
-        <p className="text-2xl font-bold">28°C</p>
-        <p className="text-muted-foreground">Partly Cloudy</p>
+        <p className="text-2xl font-bold">{weather.temp}°C</p>
+        <p className="text-muted-foreground">{weather.description}</p>
       </div>
     </CardContent>
   </Card>
 );
 
-const LiveReports = () => {
-  const reports = [
-    "Accident reported near Marathahalli bridge.",
-    "Heavy congestion on Outer Ring Road towards Tin Factory.",
-    "Procession on MG Road causing delays.",
-  ];
+const LiveReports = ({ reports }: { reports: string[] }) => {
   return (
     <Card className="h-full">
       <CardHeader>
@@ -154,18 +154,73 @@ const LiveReports = () => {
         <CardDescription>Real-time updates from various sources.</CardDescription>
       </CardHeader>
       <CardContent>
-        <ul className="space-y-3">
-          {reports.map((report, index) => (
-            <li key={index} className="flex items-start gap-3 text-sm">
-              <Info size={16} className="mt-1 text-muted-foreground shrink-0" />
-              <span>{report}</span>
-            </li>
-          ))}
-        </ul>
+        {reports.length > 0 ? (
+          <ScrollArea className="h-48">
+             <ul className="space-y-3">
+              {reports.map((report, index) => (
+                <li key={index} className="flex items-start gap-3 text-sm pr-4">
+                  <Info size={16} className="mt-1 text-muted-foreground shrink-0" />
+                  <span>{report}</span>
+                </li>
+              ))}
+            </ul>
+          </ScrollArea>
+        ) : (
+          <p className="text-sm text-muted-foreground">No live reports available at the moment.</p>
+        )}
       </CardContent>
     </Card>
   );
 };
+
+const getAlertVariant = (type: string) => {
+  switch (type.toLowerCase()) {
+    case 'accident': return 'destructive';
+    case 'road closure': return 'destructive';
+    case 'congestion': return 'default';
+    case 'weather warning': return 'default';
+    default: return 'secondary';
+  }
+}
+
+const PredictiveAlerts = ({ alerts }: { alerts: Alert[] }) => (
+  <Card>
+    <CardHeader>
+      <CardTitle className="flex items-center gap-2">
+        <ShieldAlert className="text-primary" /> Predictive Alerts
+      </CardTitle>
+      <CardDescription>AI-powered alerts for your route.</CardDescription>
+    </CardHeader>
+    <CardContent>
+      {alerts.length > 0 ? (
+        <Accordion type="single" collapsible className="w-full">
+          {alerts.map((alert, index) => (
+            <AccordionItem value={`item-${index}`} key={index}>
+              <AccordionTrigger>
+                <div className="flex items-center gap-2 text-left">
+                  <TriangleAlert className="text-destructive shrink-0" />
+                  <span>{alert.location}: {alert.type}</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-2">
+                <p>{alert.description}</p>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <Badge variant={getAlertVariant(alert.type)}>{alert.type}</Badge>
+                  <Badge variant="secondary">Relevance: {Math.round(alert.relevance * 100)}%</Badge>
+                  <Badge variant="secondary">Confidence: {Math.round(alert.confidence * 100)}%</Badge>
+                </div>
+                 <Separator />
+                <p className="text-sm font-semibold">Recommended Action: <span className="font-normal">{alert.recommendedAction}</span></p>
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      ) : (
+        <p className="text-sm text-muted-foreground">No predictive alerts for your route at the moment.</p>
+      )}
+    </CardContent>
+  </Card>
+);
 
 const LoadingSkeletons = () => (
   <>
@@ -188,6 +243,28 @@ const LoadingSkeletons = () => (
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-5/6" />
+      </CardContent>
+    </Card>
+    <Card>
+       <CardHeader>
+        <Skeleton className="h-6 w-1/2" />
+        <Skeleton className="h-4 w-3/4" />
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+      </CardContent>
+    </Card>
+     <Card>
+       <CardHeader>
+        <Skeleton className="h-6 w-1/2" />
+      </CardHeader>
+      <CardContent className="flex gap-4 items-center">
+        <Skeleton className="w-12 h-12 rounded-full" />
+        <div className="space-y-2">
+          <Skeleton className="h-6 w-16" />
+          <Skeleton className="h-4 w-24" />
+        </div>
       </CardContent>
     </Card>
   </>
@@ -302,10 +379,12 @@ const PageContent = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           {isPending && <LoadingSkeletons />}
-          {advice?.routeAnalysis && (
+          {advice && (
             <>
               <AnalysisResult analysis={advice.routeAnalysis} />
               <RecommendationResult analysis={advice.routeAnalysis} />
+              <LiveReports reports={advice.liveTrafficReports} />
+              <WeatherCard weather={advice.weather} />
             </>
           )}
           {!isPending && !advice && (
@@ -326,11 +405,18 @@ const PageContent = () => {
                   Our AI provides the best routes, times, and tips.
                 </p>
               </Card>
+               <LiveReports reports={[]} />
+               <WeatherCard weather={{ temp: 28, description: 'Partly Cloudy' }} />
             </>
           )}
-          <LiveReports />
-          <WeatherCard />
         </div>
+        
+        {advice?.predictiveAlerts?.alerts && advice.predictiveAlerts.alerts.length > 0 && (
+          <div className="mb-6">
+            <PredictiveAlerts alerts={advice.predictiveAlerts.alerts} />
+          </div>
+        )}
+
 
         <Card className="shadow-lg">
           <CardHeader>
@@ -353,8 +439,16 @@ const PageContent = () => {
 }
 
 export default function Home() {
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  if (!apiKey) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p className="text-red-500">Google Maps API key is missing. Please add it to your environment variables.</p>
+      </div>
+    )
+  }
   return (
-    <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""}>
+    <APIProvider apiKey={apiKey}>
       <PageContent />
     </APIProvider>
   );
