@@ -43,19 +43,32 @@ const routeAnalysisTool = ai.defineTool(
         outputSchema: RouteAnalysisOutputSchema,
     },
     async (input) => {
-        // Placeholder implementation for route analysis. In a real app, this would
-        // involve complex logic combining data from multiple sources.
-        return {
-            trafficAnalysis: `Simulated analysis: Traffic is currently heavy on the Outer Ring Road near ${input.origin}. ${input.trafficData}.`,
-            weatherImpact: `Simulated impact: ${input.weatherData} could lead to slower speeds and reduced visibility.`,
-            aiRecommendation: {
-                primary: `Take the NICE Road to bypass city center traffic.`,
-                alternative: `Consider using the Namma Metro Green Line towards ${input.destination}.`,
-                avoid: `Avoid Silk Board junction due to a reported accident.`,
-            },
-            bestDepartureTime: 'Leave before 3 PM or after 8 PM to avoid peak hours.',
-            prediction: 'Traffic is expected to worsen in the next hour due to evening rush.',
-        };
+        // This tool now uses the AI to generate a more dynamic analysis
+        // instead of returning hardcoded strings.
+        const llmResponse = await ai.generate({
+            prompt: `
+              Analyze the following travel request for Bengaluru and provide a detailed advisory.
+
+              Origin: ${input.origin}
+              Destination: ${input.destination}
+              Current Traffic: ${input.trafficData}
+              Current Weather: ${input.weatherData}
+
+              Based on this data, generate:
+              1.  A brief analysis of the traffic situation.
+              2.  A description of how weather will impact the trip.
+              3.  A primary recommendation (e.g., a specific route).
+              4.  An alternative recommendation (e.g., another route or metro).
+              5.  A route or area to avoid.
+              6.  The best suggested departure time.
+              7.  A prediction for how traffic might change.
+            `,
+            output: {
+                schema: RouteAnalysisOutputSchema,
+            }
+        });
+
+        return llmResponse.output!;
     }
 );
 
